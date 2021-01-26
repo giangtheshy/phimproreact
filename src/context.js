@@ -31,7 +31,6 @@ const AppProvider = ({ children }) => {
       setRole("");
     }
   }, [user]);
-  console.log(role);
   return (
     <AppContext.Provider value={{ user, setUser, role, films, isEdit, setIsEdit }}>{children}</AppContext.Provider>
   );

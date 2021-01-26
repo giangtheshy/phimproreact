@@ -1,6 +1,7 @@
 @import "../../../scss/config";
 
 .nav {
+  height: 100%;
   ul {
     @include flex(row, center, center);
     list-style-type: none;

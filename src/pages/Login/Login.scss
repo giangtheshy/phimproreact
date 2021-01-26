@@ -1,10 +1,23 @@
 @import "../../scss/config";
 .login {
   @include grid;
+  .loading {
+    @include grid;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba($lightBlack, 0.8);
+    .loading-img {
+      width: 5rem;
+      height: 5rem;
+    }
+  }
   .login {
     @include flex(column, center, center);
-    width: 50vw;
-    height: 50vh;
+    width: 60vw;
+    height: 100vh;
     background-color: $lightBlack;
     border-radius: 1rem;
     line-height: 3;
@@ -22,6 +35,41 @@
         color: $orange;
         margin-right: 0.2rem;
         font-size: 1.7rem;
+      }
+    }
+    .btn-group {
+      @include flex(row, center, center);
+      margin-bottom: 3rem;
+      width: 15rem;
+      .btn-login {
+        @include button($blue, unset);
+        width: 80%;
+      }
+      .btn-register {
+        @include button($orange, unset);
+        width: 80%;
+      }
+    }
+    form {
+      @include flex(column, center, center);
+      margin-bottom: 3rem;
+      .text-input {
+        width: 100%;
+        margin: 0.5rem 0;
+        input {
+          width: 100%;
+          border: none;
+          border-radius: 0.5rem;
+          padding: 0.3rem 1rem;
+          font-size: 1.1rem;
+          background-color: #eee;
+        }
+      }
+      .btn-submit {
+        @include button($blue, unset);
+      }
+      .btn-submit-register {
+        @include button($orange, unset);
       }
     }
     .login-btn {

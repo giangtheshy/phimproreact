@@ -40,9 +40,14 @@ const Manager = () => {
       id = timer;
     }
     if (Object.values(filmData).every((item) => item !== "")) {
+      const regex = /youtube.com\/watch\?v=/g;
       db.collection("films")
         .doc(`${id}`)
-        .set({ ...filmData, createAt: id });
+        .set({
+          ...filmData,
+          createAt: id,
+          url: filmData.url.match(regex) ? filmData.url.replace(regex, "youtube.com/embed/") : filmData.url,
+        });
       setFilmData({
         title: "",
         url: "",

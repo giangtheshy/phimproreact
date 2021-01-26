@@ -37,7 +37,14 @@ const Nav = ({ showNav, setShowNav }) => {
         <li className={`bold ${location === "/account" ? "active" : ""}`} onClick={() => history.push("/account")}>
           {user ? (
             <div className="account bold">
-              <img src={user.photoURL} alt="avatar" className="avatar bold" />
+              <img
+                src={
+                  user.photoURL ||
+                  "https://lh3.googleusercontent.com/TuW_5qbJjB2LNHCs5ZfernjesNw936Bda_2mdRC4ruDtZVIxl5TST8ykOHbkcBBEcg=s250"
+                }
+                alt="avatar"
+                className="avatar bold"
+              />
               <p className="bold">{user.displayName}</p>
             </div>
           ) : (
