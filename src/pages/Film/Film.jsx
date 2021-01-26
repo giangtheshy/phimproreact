@@ -39,12 +39,17 @@ const Film = () => {
     }
   };
   const handleWatch = () => {
-    setModal(!modal);
     if (user && !user.watched.find((item) => item === id)) {
+      setModal(!modal);
       setUser((prev) => ({ ...prev, watched: [...prev.watched, id] }));
       db.collection("users")
         .doc(`${user.uid}`)
         .update({ watched: firebase.firestore.FieldValue.arrayUnion(id) });
+    } else if (!user) {
+      history.push("/account");
+      alert("Phải Đăng Nhập Để Xem !");
+    } else if (user) {
+      setModal(!modal);
     }
   };
   const handleEdit = () => {
