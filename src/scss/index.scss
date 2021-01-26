@@ -1,0 +1,12 @@
+@import "./config";
+
+body {
+  background-color: $darkBlack;
+}
+.app {
+  &__content {
+    padding-top: 3rem;
+    width: 80%;
+    margin: 0 auto;
+  }
+}
