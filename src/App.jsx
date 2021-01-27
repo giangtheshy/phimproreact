@@ -10,7 +10,7 @@ import OddFilm from "./pages/OddFilm/OddFilm";
 import SeriesFilm from "./pages/SeriesFilm/SeriesFilm";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
-import { useGlobal } from "./context";
+
 const App = () => {
   return (
     <div className="app">
