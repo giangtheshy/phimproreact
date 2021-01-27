@@ -25,7 +25,10 @@ const AppProvider = ({ children }) => {
     fetchFilms();
   }, [fetchFilms]);
   useEffect(() => {
-    if (user && user.uid === "qJJA1TDBfzdMXi4380OzfK5Eopw2") {
+    if (
+      (user && user.uid === "qJJA1TDBfzdMXi4380OzfK5Eopw2") ||
+      (user && user.uid === "PhtOZLe2I6bsJPQeEnwk9X1f3h42")
+    ) {
       setRole("admin");
     } else {
       setRole("");

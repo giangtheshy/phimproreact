@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { ImGooglePlus, ImFilm } from "react-icons/im";
+import { ImGooglePlus } from "react-icons/im";
 import { HiEye, HiHeart } from "react-icons/hi";
+import { GiPopcorn } from "react-icons/gi";
 import { useHistory } from "react-router-dom";
 import db, { provider, auth } from "../../firebase";
 import { useGlobal } from "../../context";
@@ -120,8 +121,8 @@ const Login = () => {
       )}
       <div className="login">
         <div className="logo">
-          <ImFilm className="icon-logo" />
-          <span className="bold">PHIM </span> PRO
+          <GiPopcorn className="icon-logo" />
+          <span className="bold orange-text">TEA </span> MOVIES
         </div>
         <p className="title">Đăng nhập để trải nghiệm tốt hơn</p>
         <div className="btn-group">

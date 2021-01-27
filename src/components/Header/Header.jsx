@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import { ImFilm } from "react-icons/im";
+import { GiPopcorn } from "react-icons/gi";
 import { FaBars } from "react-icons/fa";
 
 import "./Header.scss";
@@ -12,8 +12,8 @@ const Header = () => {
   return (
     <header>
       <div className="logo" onClick={() => history.push("/")}>
-        <ImFilm className="icon-logo" />
-        <span className="bold">PHIM </span> PRO
+        <GiPopcorn className="icon-logo" />
+        <span className="bold orange-text">TEA </span> MOVIES
       </div>
       <FaBars className="icon" onClick={() => setShowNav(true)} />
       <Nav showNav={showNav} setShowNav={setShowNav} />
