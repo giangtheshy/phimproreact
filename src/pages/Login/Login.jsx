@@ -56,7 +56,7 @@ const Login = () => {
       auth
         .signInWithEmailAndPassword(userData.email, userData.password)
         .then((userCredential) => {})
-        .catch((error) => alert(error.message));
+        .catch((error) => alert("Email hoặc mật khẩu không chính xác!"));
       setUserData({ email: "", password: "" });
       history.push("/");
       setLoading(false);
@@ -78,7 +78,7 @@ const Login = () => {
           const userDoc = db.collection("users").doc(`${uid}`);
           userDoc.set({ uid, photoURL, displayName: userCredential.user.displayName, fav: [], watched: [] });
         })
-        .catch((error) => alert(error.message));
+        .catch((error) => alert("Tài khoản đã tồn tại hoặc không đúng định dạng!"));
       setDataReg({ email: "", password: "", displayName: "" });
       history.push("/");
       setLoading(false);

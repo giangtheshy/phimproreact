@@ -90,11 +90,11 @@ const Film = () => {
             >
               <HiHeart /> {user && user.fav.find((item) => item === id) ? "Hủy Thích" : "Yêu Thích"}
             </button>
-            {film.upcoming === "false" && (
-              <button className="watch" onClick={handleWatch}>
-                <HiEye /> Xem Phim
-              </button>
-            )}
+
+            <button className="watch" onClick={handleWatch}>
+              <HiEye /> {film.upcoming === "false" ? "Xem Phim" : "Trailer"}
+            </button>
+
             {role === "admin" && (
               <>
                 <button className="watch" onClick={handleEdit}>
