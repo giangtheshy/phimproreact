@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import "./Search.scss";
+
+// /Khung tìm kiếm phim (nằm ở phía dưới thanh header)
+
 const Search = ({ value, setValue }) => {
   return (
     <div className="search-container">
+      {/* form để nhập giá trị */}
       <form>
         <input
           type="text"

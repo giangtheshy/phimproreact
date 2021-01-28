@@ -10,6 +10,8 @@ import loadingimg from "../../loading.gif";
 
 import "./Login.scss";
 
+//Trang này sẽ hiển thị ra form đăng nhập\đăng ký nếu chưa có tài khoản nào được đăng nhập trước đó. Nếu đã đăng nhập thì trang này sẽ hiển thị danh sách phim yêu thích và đã xem ,có route là('/account')
+
 const Login = () => {
   const { setUser, user, films } = useGlobal();
   const [active, setActive] = useState("heart");
@@ -21,17 +23,22 @@ const Login = () => {
   const history = useHistory();
 
   const handleClickLogin = () => {
+    // Hàm xử lý đăng nhập bằng Google
     try {
       auth.signInWithPopup(provider).then(async (result) => {
         const { uid, photoURL, displayName } = result.user;
+        // Lấy thông tin của người dùng khi kết nối với google
         const userDoc = db.collection("users").doc(`${uid}`);
         const existing = await userDoc.get();
+        // Nếu đã lưu trên firestore thì chỉ lấy thông tin về để set cho user hiện tại
         if (!existing.exists) {
+          // Nếu là lần đầu thì khỏi tạo user cho cả firestore và local
           userDoc.set({ uid, photoURL, displayName, fav: [], watched: [] });
           setUser({ uid, photoURL, displayName, fav: [], watched: [] });
         } else {
           setUser(existing.data());
         }
+        // Chuyển đến trang chủ
         history.push("/");
       });
     } catch (error) {
@@ -39,6 +46,7 @@ const Login = () => {
     }
   };
   const handleClickLogout = () => {
+    // Hàm xử lý Logout
     auth.signOut();
     setUser(null);
     history.push("/");
@@ -50,6 +58,7 @@ const Login = () => {
     setDataReg({ ...dataReg, [e.target.name]: e.target.value });
   };
   const handleSubmitLogin = (e) => {
+    // Hàm xử xử đăng nhập bằng tài khoản email và password
     e.preventDefault();
     setLoading(true);
     try {
@@ -66,6 +75,7 @@ const Login = () => {
     }
   };
   const handleSubmitRegister = (e) => {
+    // Hàm xử lý khi đăng ký tài khoản
     e.preventDefault();
     setLoading(true);
     try {
@@ -73,6 +83,7 @@ const Login = () => {
         .createUserWithEmailAndPassword(dataReg.email, dataReg.password)
         .then(async (userCredential) => {
           const curUser = auth.currentUser;
+          // Đăng ký thành công và khỏi tạo user trên firestore với thông tin vừa đăng ký (tự động đăng nhập khi đăng ký thành công)
           await curUser.updateProfile({ displayName: dataReg.displayName }).then(() => console.log("success"));
           const { uid, photoURL } = userCredential.user;
           const userDoc = db.collection("users").doc(`${uid}`);
@@ -101,6 +112,7 @@ const Login = () => {
             <HiEye /> Đã Xem
           </button>
         </div>
+        {/* Hiển thị danh sách phim theo yêu thích hoặc đã xem khi người dùng click tương ứng button */}
         <ListFilm
           type="row"
           films={

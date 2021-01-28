@@ -3,6 +3,8 @@ import { AiFillFacebook, AiFillInstagram, AiFillTwitterSquare } from "react-icon
 import { useHistory } from "react-router-dom";
 import "./Footer.scss";
 
+// Thư mục chứa thành phần footer của trang web(gồm thông tin liên lạc).
+
 const Footer = () => {
   const history = useHistory();
   return (
@@ -14,6 +16,8 @@ const Footer = () => {
           <li>Bản Quyền</li>
         </ul>
         <ul>
+          {/* đường dẫn đến các router trong trang web  */}
+
           <li onClick={() => history.push("/")}>Trang Chủ</li>
           <li onClick={() => history.push("/seriesfilm")}>Phim Bộ</li>
           <li onClick={() => history.push("/oddfilm")}>Phim Lẻ</li>

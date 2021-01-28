@@ -1,5 +1,7 @@
 import firebase from "firebase";
 
+//File config kết nối với firebase cloud.
+
 const firebaseConfig = {
   apiKey: "AIzaSyCln_3vggZ3EC5Q9oCluWscDS08WWwdrkg",
   authDomain: "webphim-7ec17.firebaseapp.com",
@@ -10,9 +12,11 @@ const firebaseConfig = {
 };
 
 const firebaseApp = firebase.initializeApp(firebaseConfig);
+// db là database của firebase (hay còn gọi với cái tên thân mật là firestore hay firestore cloud)
 const db = firebaseApp.firestore();
+// auth là tài khoản của người dùng
 const auth = firebase.auth();
-const storage = firebaseApp.storage();
+// Phương thức cho phép đăng nhập bằng google của firebase
 const provider = new firebase.auth.GoogleAuthProvider();
-export { auth, provider, storage };
+export { auth, provider };
 export default db;

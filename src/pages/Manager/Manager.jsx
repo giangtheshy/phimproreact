@@ -3,6 +3,8 @@ import { useGlobal } from "../../context";
 import "./Manager.scss";
 import db from "../../firebase";
 
+// Trang này là nơi chứa form để thêm phim và chỉnh sửa phim , chỉ có tài khoản admin mới có thể truy cập vào trang này có route là ('/manager')
+
 const Manager = () => {
   const { role, isEdit, setIsEdit, films } = useGlobal();
   const [filmData, setFilmData] = useState({
@@ -22,7 +24,9 @@ const Manager = () => {
   });
 
   useEffect(() => {
+    // Kiểm tra xem hiện tại có phải là ở trạng thái cập nhật phim hay không
     if (isEdit) {
+      // Nếu là trạng thái cập nhật phim thì set các trường input bằng giá trị của phim đang cập nhật
       const film = films.find((item) => item.createAt === isEdit);
       setFilmData(film);
     }
@@ -31,16 +35,22 @@ const Manager = () => {
     setFilmData({ ...filmData, [e.target.name]: e.target.value });
   };
   const handleSubmit = (e) => {
+    // Hàm sử lý khi submit form thêm phim mới hoặc cập nhật phim cũ
     e.preventDefault();
     let id;
     const timer = new Date().getTime().toString();
+    // Nếu trang thái cập nhật thì id của phim bằng id cũ của phim
     if (isEdit) {
       id = isEdit;
     } else {
+      // Nếu không phải trạng thái cập nhật thì id được tạo mới bằng thời gian hiện tại (Lấy đơn vị là mili giây)
       id = timer;
     }
+    // Kiểm tra xem tất cả các trường input đã được nhập và có giá trị hay chưa
     if (Object.values(filmData).every((item) => item !== "")) {
+      // Lọc các đường dẫn youtube để nhúng vào phim (vì nếu lấy link trực tiếp từ youtube sẽ bị chặn)
       const regex = /youtube.com\/watch\?v=/g;
+      // Cú pháp trên phim trên firestore
       db.collection("films")
         .doc(`${id}`)
         .set({
@@ -64,11 +74,13 @@ const Manager = () => {
         isMultiEp: "",
       });
       setIsEdit(null);
+      // Khi thêm xong thì scroll về đầu form
       window.scrollTo({ top: 0, left: 0 });
     } else {
       alert("Phải điền đầy đủ các trường !");
     }
   };
+  // Chỉ user admin mới hiển thị ra form nhập phim khi vào router này
   if (role === "admin") {
     return (
       <section className="manager">
@@ -220,6 +232,7 @@ const Manager = () => {
       </section>
     );
   } else {
+    // Các user khác nếu cố vào router này sẽ hiển thị không tìm thấy trang
     return (
       <div className="manager">
         <p className="not-found">Page not found</p>
