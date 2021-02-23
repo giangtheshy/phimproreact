@@ -1,12 +1,14 @@
 import React, { useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+
 import "./Nav.scss";
-import { useGlobal } from "../../../context";
 
 const Nav = ({ showNav, setShowNav }) => {
   const history = useHistory();
   const location = useLocation().pathname;
-  const { user, role } = useGlobal();
+  const user = useSelector((state) => state.users.user);
+  const role = useSelector((state) => state.users.role);
 
   useEffect(() => {
     const handleEvent = (e) => {
@@ -29,13 +31,13 @@ const Nav = ({ showNav, setShowNav }) => {
         >
           Phim Bộ
         </li>
-        {user && role === "admin" && (
+        {role === "admin" && (
           <li className={`bold ${location === "/manager" ? "active" : ""}`} onClick={() => history.push("/manager")}>
             Quản Lý Phim
           </li>
         )}
         <li className={`bold ${location === "/account" ? "active" : ""}`} onClick={() => history.push("/account")}>
-          {user ? (
+          {user?._id ? (
             <div className="account bold">
               <img
                 src={

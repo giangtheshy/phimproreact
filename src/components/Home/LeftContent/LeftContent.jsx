@@ -1,9 +1,7 @@
 import React from "react";
 import "./LeftContent.scss";
 import ListFilm from "../../utils/ListFilm/ListFilm";
-import { useGlobal } from "../../../context";
-const LeftContent = () => {
-  const { films } = useGlobal();
+const LeftContent = ({ films }) => {
   if (!films) return <></>;
   return (
     <section className="left-container">

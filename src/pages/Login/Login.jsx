@@ -1,47 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ImGooglePlus } from "react-icons/im";
 import { HiEye, HiHeart } from "react-icons/hi";
 import { GiPopcorn } from "react-icons/gi";
 import { useHistory } from "react-router-dom";
-import db, { provider, auth } from "../../firebase";
-import { useGlobal } from "../../context";
+import { useCookies } from "react-cookie";
+import { useDispatch, useSelector } from "react-redux";
+import GoogleLogin from "react-google-login";
+import { FcGoogle } from "react-icons/fc";
+import FileBase from "react-file-base64";
+
+import { loginUser, logoutUser, registerUser, loginGoogle } from "../../actions/user.action";
+import { getFavorites, getWatched } from "../../actions/film.action";
+
 import ListFilm from "../../components/utils/ListFilm/ListFilm";
-import loadingimg from "../../loading.gif";
 
 import "./Login.scss";
 
 const Login = () => {
-  const { setUser, user, films } = useGlobal();
+  const [cookies, setCookies] = useCookies(["user"]);
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.users.user);
+  const favorites = useSelector((state) => state.films.favorites);
+  const watched = useSelector((state) => state.films.watched);
   const [active, setActive] = useState("heart");
   const [isLogin, setIsLogin] = useState(true);
-  const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState({ email: "", password: "" });
-  const [dataReg, setDataReg] = useState({ email: "", password: "", displayName: "" });
+  const [dataReg, setDataReg] = useState({
+    email: "",
+    displayName: "",
+    password: "",
+    photoURL: null,
+    passwordCheck: "",
+  });
 
   const history = useHistory();
-
-  const handleClickLogin = () => {
-    try {
-      auth.signInWithPopup(provider).then(async (result) => {
-        const { uid, photoURL, displayName } = result.user;
-        const userDoc = db.collection("users").doc(`${uid}`);
-        const existing = await userDoc.get();
-        if (!existing.exists) {
-          userDoc.set({ uid, photoURL, displayName, fav: [], watched: [] });
-          setUser({ uid, photoURL, displayName, fav: [], watched: [] });
-        } else {
-          setUser(existing.data());
-        }
-        history.push("/");
-      });
-    } catch (error) {
-      console.log(error);
+  useEffect(() => {
+    if (user) {
+      dispatch(getFavorites(user._id));
+      dispatch(getWatched(user._id));
     }
-  };
-  const handleClickLogout = () => {
-    auth.signOut();
-    setUser(null);
+  }, [user]);
+  const handleSuccess = async (res) => {
+    const { name, imageUrl, email, googleId } = res.profileObj;
+    const token = res.tokenId;
+    dispatch(loginGoogle({ name, imageUrl, googleId, email, token }, setCookies));
     history.push("/");
+  };
+  const handleFailure = () => {
+    alert("Some errors were occur when login");
+  };
+  const handleClickLogout = async () => {
+    await setCookies("user", "", { path: "/" });
+    dispatch(logoutUser());
+    history.push("/account");
   };
   const handleOnchangeLogin = (e) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
@@ -49,45 +60,40 @@ const Login = () => {
   const handleOnchangeRegister = (e) => {
     setDataReg({ ...dataReg, [e.target.name]: e.target.value });
   };
-  const handleSubmitLogin = (e) => {
+  const handleSubmitLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      auth
-        .signInWithEmailAndPassword(userData.email, userData.password)
-        .then((userCredential) => {})
-        .catch((error) => alert("Email hoặc mật khẩu không chính xác!"));
-      setUserData({ email: "", password: "" });
-      history.push("/");
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      alert(error.message);
+    if (userData.email !== "" && userData.password !== "") {
+      try {
+        const message = await dispatch(loginUser(userData, setCookies));
+        if (!message) {
+          history.push("/");
+        } else {
+          alert(message);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      alert("must fill in full fields");
     }
+    setUserData({ email: "", password: "" });
   };
   const handleSubmitRegister = (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      auth
-        .createUserWithEmailAndPassword(dataReg.email, dataReg.password)
-        .then(async (userCredential) => {
-          const curUser = auth.currentUser;
-          await curUser.updateProfile({ displayName: dataReg.displayName }).then(() => console.log("success"));
-          const { uid, photoURL } = userCredential.user;
-          const userDoc = db.collection("users").doc(`${uid}`);
-          userDoc.set({ uid, photoURL, displayName: userCredential.user.displayName, fav: [], watched: [] });
-        })
-        .catch((error) => alert("Tài khoản đã tồn tại hoặc không đúng định dạng!"));
-      setDataReg({ email: "", password: "", displayName: "" });
-      history.push("/");
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      alert(error.message);
+    if (
+      dataReg.displayName !== "" &&
+      dataReg.email !== "" &&
+      dataReg.password !== "" &&
+      dataReg.photoURL !== "" &&
+      dataReg.passwordCheck !== ""
+    ) {
+      dispatch(registerUser(dataReg, setCookies));
+    } else {
+      alert("Please Fill in full fields");
     }
+    setDataReg({ email: "", displayName: "", password: "", photoURL: null, passwordCheck: "" });
   };
-  if (user && films) {
+  if (user._id) {
     return (
       <section className="account">
         <button className="logout-btn" onClick={handleClickLogout}>
@@ -101,24 +107,12 @@ const Login = () => {
             <HiEye /> Đã Xem
           </button>
         </div>
-        <ListFilm
-          type="row"
-          films={
-            active === "heart"
-              ? films.filter((film) => user.fav.find((item) => item === film.createAt))
-              : films.filter((film) => user.watched.find((item) => item === film.createAt))
-          }
-        />
+        <ListFilm type="row" films={active === "heart" ? favorites : watched} />
       </section>
     );
   }
   return (
     <section className="login">
-      {loading && (
-        <div className="loading">
-          <img src={loadingimg} alt="loading" className="loading-img" />
-        </div>
-      )}
       <div className="login">
         <div className="logo">
           <GiPopcorn className="icon-logo" />
@@ -185,6 +179,16 @@ const Login = () => {
                 placeholder="Password"
               />
             </label>
+            <label htmlFor="passwordRegCheck" className="text-input">
+              <input
+                type="password"
+                name="passwordCheck"
+                id="passwordRegCheck"
+                value={dataReg.passwordCheck}
+                onChange={handleOnchangeRegister}
+                placeholder="Password"
+              />
+            </label>
             <label htmlFor="displayName" className="text-input">
               <input
                 type="text"
@@ -195,15 +199,31 @@ const Login = () => {
                 placeholder="Họ Tên"
               />
             </label>
+            <label htmlFor="photo-url" className="photo-url">
+              <FileBase
+                type="file"
+                id="photo-url"
+                onDone={({ base64 }) => setDataReg({ ...dataReg, photoURL: base64 })}
+                multiple={false}
+              />
+            </label>
             <button type="submit" className="btn-submit-register">
               Đăng Ký
             </button>
           </form>
         )}
 
-        <button className="login-btn" onClick={handleClickLogin}>
-          <ImGooglePlus className="icon" /> Đăng Nhập Bằng Google
-        </button>
+        <GoogleLogin
+          clientId="467571315756-vigfi3qh89vvgbeqhduotlr2jso13gl5.apps.googleusercontent.com"
+          onSuccess={handleSuccess}
+          onFailure={handleFailure}
+          cookiePolicy="single_host_origin"
+          render={(props) => (
+            <button className="login-btn" onClick={props.onClick} disabled={props.disabled}>
+              <ImGooglePlus className="icon" /> Đăng Nhập Bằng Google
+            </button>
+          )}
+        />
       </div>
     </section>
   );

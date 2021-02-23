@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import "./RightContent.scss";
 import ListFilm from "../../utils/ListFilm/ListFilm";
-import { useGlobal } from "../../../context";
 
-const RightContent = ({ value, setValue }) => {
+const RightContent = ({ value, setValue, films }) => {
   const [active, setActive] = useState("all");
-  const { films } = useGlobal();
 
   const handleClick = (e) => {
     setValue("");
@@ -14,6 +12,7 @@ const RightContent = ({ value, setValue }) => {
   if (!films) {
     return <></>;
   }
+  console.log(films);
   return (
     <section className="right-container">
       <div className="right-container__header">
@@ -37,8 +36,8 @@ const RightContent = ({ value, setValue }) => {
             active === "all"
               ? film
               : active === "upcoming"
-              ? film.upcoming === "true" && film
-              : new Date().getTime() - film.createAt < 1000 * 60 * 60 * 24 * 7 && film
+              ? film.upComing === "true" && film
+              : new Date().getTime() - film.createdAt < 1000 * 60 * 60 * 24 * 7 && film
           )
           .filter((film) => film.title.toLowerCase().includes(value.toLowerCase()))}
       />

@@ -1,13 +1,13 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import "./SeriesFilm.scss";
 import ListFilm from "../../components/utils/ListFilm/ListFilm";
 import Search from "../../components/Search/Search";
-import { useGlobal } from "../../context";
 
 const SeriesFilm = () => {
-  const { films } = useGlobal();
+  const films = useSelector((state) => state.films.films);
   const [value, setValue] = useState("");
-  if (!films) return <></>;
+  if (films.length === 0) return <></>;
 
   return (
     <>

@@ -1,50 +1,43 @@
 import React, { useState, useEffect } from "react";
-import firebase from "firebase";
 import { useParams, useHistory } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import { BsTagFill } from "react-icons/bs";
 import { HiHeart, HiEye } from "react-icons/hi";
 import { BiEdit } from "react-icons/bi";
 import { FaTrash } from "react-icons/fa";
 
-import db from "../../firebase";
+import { getSingleFilm, setIsEdit, removeFilm } from "../../actions/film.action";
+import { addFavorite, addWatched, removeFavorite } from "../../actions/user.action";
 import "./Film.scss";
 import Stars from "../../components/utils/Stars/Stars";
 import ListFilm from "../../components/utils/ListFilm/ListFilm";
 import ModalFilm from "../../components/Modal/ModalFilm";
-import { useGlobal } from "../../context";
 
 const Film = () => {
   const [modal, setModal] = useState(false);
-  const [film, setFilm] = useState({});
-  const { films, setUser, user, role, setIsEdit } = useGlobal();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.users.user);
+  const role = useSelector((state) => state.users.role);
+  const film = useSelector((state) => state.films.film);
+  const films = useSelector((state) => state.films.films);
   const { id } = useParams();
   const history = useHistory();
   useEffect(() => {
-    if (films) {
-      setFilm(films.find((film) => film.createAt === id));
-    }
+    dispatch(getSingleFilm(id));
     window.scrollTo({ top: 0, left: 0 });
-  }, [films, id]);
+  }, [id]);
+
   const handleFav = () => {
-    if (user && user.fav.find((item) => item === id)) {
-      setUser((prev) => ({ ...prev, fav: prev.fav.filter((item) => item !== id) }));
-      db.collection("users")
-        .doc(`${user.uid}`)
-        .update({ fav: user.fav.filter((item) => item !== id) });
-    } else if (user) {
-      setUser((prev) => ({ ...prev, fav: [...prev.fav, id] }));
-      db.collection("users")
-        .doc(`${user.uid}`)
-        .update({ fav: firebase.firestore.FieldValue.arrayUnion(id) });
+    if (user?.favorites?.find((item) => item === film.createdAt)) {
+      dispatch(removeFavorite(user._id, film.createdAt));
+    } else {
+      dispatch(addFavorite(user._id, film.createdAt));
     }
   };
   const handleWatch = () => {
-    if (user && !user.watched.find((item) => item === id)) {
+    if (!user?.watched?.find((item) => item === film.createdAt)) {
       setModal(!modal);
-      setUser((prev) => ({ ...prev, watched: [...prev.watched, id] }));
-      db.collection("users")
-        .doc(`${user.uid}`)
-        .update({ watched: firebase.firestore.FieldValue.arrayUnion(id) });
+      dispatch(addWatched(user._id, film.createdAt));
     } else if (!user) {
       history.push("/account");
       alert("Phải Đăng Nhập Để Xem !");
@@ -53,20 +46,14 @@ const Film = () => {
     }
   };
   const handleEdit = () => {
-    setIsEdit(id);
+    dispatch(setIsEdit(id));
     history.push("/manager");
   };
   const handleRemove = () => {
-    db.collection("films")
-      .doc(`${id}`)
-      .delete()
-      .then(() => {
-        alert("Xóa Phim Thành Công!");
-      })
-      .catch((err) => console.log(err));
+    dispatch(removeFilm(id));
     history.push("/");
   };
-  if (!film || !films) return <></>;
+  if (!film) return <></>;
   return (
     <section className="film">
       {modal && <ModalFilm setModal={setModal} url={film.url} />}
@@ -85,14 +72,14 @@ const Film = () => {
           </div>
           <div className="btn-group">
             <button
-              className={`add-fav ${user && user.fav.find((item) => item === id) ? "disable" : ""}`}
+              className={`add-fav ${user?.favorites?.find((item) => item === film.createdAt) ? "disable" : ""}`}
               onClick={handleFav}
             >
-              <HiHeart /> {user && user.fav.find((item) => item === id) ? "Hủy Thích" : "Yêu Thích"}
+              <HiHeart /> {user?.favorites?.find((item) => item === film.createdAt) ? "Hủy Thích" : "Yêu Thích"}
             </button>
 
             <button className="watch" onClick={handleWatch}>
-              <HiEye /> {film.upcoming === "false" ? "Xem Phim" : "Trailer"}
+              <HiEye /> {film.upComing === "false" ? "Xem Phim" : "Trailer"}
             </button>
 
             {role === "admin" && (
@@ -109,7 +96,7 @@ const Film = () => {
           <div className="details-option">
             <p>
               <span className="bold">Trạng thái:</span>
-              <span className="orange-text"> {film.upcoming === "true" ? "Chưa ra mắt" : "Hoàn tất"}</span>
+              <span className="orange-text"> {film.upComing === "true" ? "Chưa ra mắt" : "Hoàn tất"}</span>
             </p>
             <p>
               <span className="bold">Đạo diễn:</span> <span className="orange-text">{film.directors},</span>
@@ -143,7 +130,7 @@ const Film = () => {
         </div>
       </div>
       <div className="film__detail">{film.description}</div>
-      <ListFilm type="row" films={films.filter((item) => item.isMultiEp === film.isMultiEp)} />
+      <ListFilm type="row" films={films.filter((item) => item.isMultiEp === film.isMultiEp && item._id !== film._id)} />
     </section>
   );
 };

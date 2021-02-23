@@ -3,17 +3,17 @@ import "./Film.scss";
 import { BsTagFill } from "react-icons/bs";
 import { useHistory } from "react-router-dom";
 import { HiEye } from "react-icons/hi";
+import { useSelector } from "react-redux";
 import Stars from "../../../utils/Stars/Stars";
-import { useGlobal } from "../../../../context";
 const Film = ({ film }) => {
-  const { user } = useGlobal();
   const history = useHistory();
+  const user = useSelector((state) => state.users.user);
   return (
-    <article className="film-center" onClick={() => history.push(`/film/${film.createAt}`)}>
+    <article className="film-center" onClick={() => history.push(`/film/${film._id}`)}>
       <div className="img">
         <span className="evaluate">{film.evaluate}</span>
         <img src={film.image} alt={film.title} />
-        {user && user.watched.some((item) => item === film.createAt) && (
+        {user?.watched?.some((item) => item === film.createAt) && (
           <span className="watched">
             <HiEye />
             Đã Xem
